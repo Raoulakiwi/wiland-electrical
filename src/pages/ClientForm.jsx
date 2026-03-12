@@ -28,8 +28,8 @@ function ClientForm() {
     
     try {
       const url = isEdit 
-        ? `http://localhost:8000/clients/${id}`
-        : 'http://localhost:8000/clients';
+        ? `/clients/${id}`
+        : '/clients';
       
       const response = await fetch(url, {
         method: isEdit ? 'PUT' : 'POST',

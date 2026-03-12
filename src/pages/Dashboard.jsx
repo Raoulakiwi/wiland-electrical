@@ -26,7 +26,7 @@ function Dashboard() {
 
   const fetchClients = async (token) => {
     try {
-      const response = await fetch('http://localhost:8000/clients', {
+      const response = await fetch('/clients', {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       
