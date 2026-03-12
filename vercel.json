@@ -1,0 +1,10 @@
+{
+  "rewrites": [
+    { "source": "/api/(.*)", "destination": "/api/main.py" },
+    { "source": "/(.*)", "destination": "/index.html" }
+  ],
+  "build": {
+    "command": "pip install -r backend/requirements.txt && vite build",
+    "outputDirectory": "dist"
+  }
+}
