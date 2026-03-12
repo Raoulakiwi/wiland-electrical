@@ -21,24 +21,34 @@ function Dashboard() {
       setTenant(JSON.parse(tenantData));
     }
     
-    fetchClients(token);
+    // Check if demo mode
+    if (token === 'demo-token') {
+      // Demo data
+      setClients([
+        { id: '1', business_name: 'Wiland Electrical', contact_name: 'John Smith', phone_number: '+61 400 123 456', status: 'active' },
+        { id: '2', business_name: 'ABC Plumbing', contact_name: 'Jane Doe', phone_number: '+61 400 789 012', status: 'trial' },
+        { id: '3', business_name: 'XYZ HVAC', contact_name: 'Bob Wilson', phone_number: '+61 400 345 678', status: 'active' },
+      ]);
+      setStats({ total: 3, active: 2, trial: 1, calls: 47 });
+    } else {
+      fetchClients(token);
+    }
   }, [navigate]);
 
   const fetchClients = async (token) => {
     try {
-      const response = await fetch('/clients', {
+      const response = await fetch('/api/clients', {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       
       if (response.ok) {
         const data = await response.json();
         setClients(data);
-        
         setStats({
           total: data.length,
           active: data.filter(c => c.status === 'active').length,
           trial: data.filter(c => c.status === 'trial').length,
-          calls: 0  // TODO: fetch from calls endpoint
+          calls: 0
         });
       }
     } catch (err) {
@@ -57,7 +67,6 @@ function Dashboard() {
   return (
     <div style={{ background: '#1a1a2e', minHeight: '100vh', padding: '20px 0' }}>
       <Container fluid>
-        {/* Header */}
         <Row className="mb-4">
           <Col>
             <div className="d-flex justify-content-between align-items-center">
@@ -66,6 +75,9 @@ function Dashboard() {
                 <small className="text-muted">{tenant.brand_name || tenant.name}</small>
               </div>
               <div>
+                {tenant.id === 'demo-123' && (
+                  <Badge bg="warning" className="me-2">Demo Mode</Badge>
+                )}
                 <Button variant="outline-light" size="sm" onClick={handleLogout} className="me-2">
                   Logout
                 </Button>
@@ -77,7 +89,6 @@ function Dashboard() {
           </Col>
         </Row>
 
-        {/* Stats */}
         <Row className="mb-4">
           <Col md={3}>
             <Card style={{ background: '#16213e', border: 'none' }}>
@@ -113,7 +124,6 @@ function Dashboard() {
           </Col>
         </Row>
 
-        {/* Clients Table */}
         <Row>
           <Col>
             <Card style={{ background: '#16213e', border: 'none', color: 'white' }}>

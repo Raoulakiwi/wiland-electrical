@@ -15,18 +15,36 @@ function Login({ setToken }) {
     setError('');
     
     try {
+      // Try demo mode first (bypass auth)
+      if (email === 'demo@callpilot.com' && password === 'demo') {
+        const demoTenant = {
+          id: 'demo-123',
+          name: 'Demo Agency',
+          brand_name: 'Demo AI Reception',
+          email: 'demo@callpilot.com',
+          subscription_tier: 'starter'
+        };
+        localStorage.setItem('token', 'demo-token');
+        localStorage.setItem('tenant', JSON.stringify(demoTenant));
+        setToken('demo-token');
+        navigate('/dashboard');
+        return;
+      }
+      
+      // Try real API
       const formData = new URLSearchParams();
       formData.append('username', email);
       formData.append('password', password);
       
-      const response = await fetch('/token', {
+      const response = await fetch('/api/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
         body: formData
       });
       
       if (!response.ok) {
-        throw new Error('Invalid email or password');
+        // Fall back to demo mode
+        throw new Error('Use demo@callpilot.com / demo');
       }
       
       const data = await response.json();
@@ -35,7 +53,8 @@ function Login({ setToken }) {
       setToken(data.access_token);
       navigate('/dashboard');
     } catch (err) {
-      setError(err.message);
+      // If API fails, suggest demo
+      setError('Invalid credentials. Try: demo@callpilot.com / demo');
     } finally {
       setLoading(false);
     }
@@ -53,7 +72,7 @@ function Login({ setToken }) {
                 </h2>
                 <p className="text-center mb-4 text-muted">Sign in to your agency portal</p>
                 
-                {error && <Alert variant="danger">{error}</Alert>}
+                {error && <Alert variant="warning">{error}</Alert>}
                 
                 <Form onSubmit={handleLogin}>
                   <Form.Group className="mb-3">
@@ -62,7 +81,7 @@ function Login({ setToken }) {
                       type="email"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      placeholder="agency@company.com"
+                      placeholder="demo@callpilot.com"
                       style={{ background: '#0f3460', border: '1px solid #e94560', color: 'white' }}
                       required
                     />
@@ -74,7 +93,7 @@ function Login({ setToken }) {
                       type="password"
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
-                      placeholder="••••••••"
+                      placeholder="demo"
                       style={{ background: '#0f3460', border: '1px solid #e94560', color: 'white' }}
                       required
                     />
@@ -90,10 +109,11 @@ function Login({ setToken }) {
                   </Button>
                 </Form>
                 
-                <p className="text-center mt-4 text-muted">
-                  Don't have an account?{' '}
-                  <span style={{ color: '#e94560', cursor: 'pointer' }}>Sign up</span>
-                </p>
+                <div className="text-center mt-4 p-3" style={{ background: '#0f3460', borderRadius: '8px' }}>
+                  <small className="text-muted">Demo Mode</small>
+                  <div style={{ color: '#e94560', fontWeight: 'bold' }}>demo@callpilot.com</div>
+                  <small className="text-muted">password: demo</small>
+                </div>
               </Card.Body>
             </Card>
           </Col>
