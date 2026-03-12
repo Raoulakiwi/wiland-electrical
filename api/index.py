@@ -168,4 +168,4 @@ def delete_client(client_id):
     return jsonify({"message": "Client deleted"})
 
 # Vercel entry point
-app.run(host='0.0.0.0', port=8000)
+app.run(host='0.0.0.0', port=int(os.getenv('PORT', 8000))
