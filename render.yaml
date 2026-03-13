@@ -1,7 +1,7 @@
 services:
   - type: web
     name: callpilot-backend
-    env: python
-    buildCommand: pip install flask
-    startCommand: python api/test.py
+    env: node
+    buildCommand: npm install
+    startCommand: node server.js
     plan: free
