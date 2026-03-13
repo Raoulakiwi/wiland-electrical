@@ -1,7 +1,7 @@
 services:
   - type: web
     name: callpilot-backend
-    env: node
-    buildCommand: npm install
-    startCommand: node server.js
+    env: python
+    buildCommand: pip install flask flask-cors
+    startCommand: python -c "from api.index import app; app.run(host='0.0.0.0', port=10000)"
     plan: free
