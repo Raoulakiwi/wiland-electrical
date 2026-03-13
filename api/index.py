@@ -59,7 +59,8 @@ def register():
                    generate_password_hash(data['password'])))
         conn.commit()
         access_token = create_access_token(identity=tenant_id)
-        return jsonify({"access_token": access_token, "token_type": "bearer"})
+        tenant = {"id": tenant_id, "name": data["name"], "brand_name": data.get("brand_name", data["name"]), "email": data["email"]}
+        return jsonify({"access_token": access_token, "token_type": "bearer", "tenant": tenant})
     except sqlite3.IntegrityError:
         return jsonify({"error": "Email already registered"}), 400
     finally:
