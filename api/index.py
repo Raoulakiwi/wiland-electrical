@@ -6,7 +6,7 @@ import uuid
 import os
 
 app = Flask(__name__)
-CORS(app)
+CORS(app, origins=['https://wiland-electrical.vercel.app', 'http://localhost:5173'], supports_credentials=True)
 app.config['JWT_SECRET_KEY'] = os.getenv('JWT_SECRET_KEY', 'callpilot-secret-change-in-prod')
 jwt = JWTManager(app)
 
