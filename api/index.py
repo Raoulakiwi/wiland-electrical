@@ -167,4 +167,15 @@ def delete_client(client_id):
     return jsonify({"message": "Client deleted"})
 
 # Vercel entry point
+
+@app.route("/api/admin/users", methods=["GET"])
+def list_users():
+    conn = sqlite3.connect(DB_NAME)
+    conn.row_factory = sqlite3.Row
+    c = conn.cursor()
+    c.execute("SELECT id, name, email, brand_name, created_at FROM tenants")
+    users = [dict(row) for row in c.fetchall()]
+    conn.close()
+    return jsonify(users)
+
 app.run(host='0.0.0.0', port=int(os.getenv('PORT', 10000)))

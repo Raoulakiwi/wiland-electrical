@@ -5,17 +5,35 @@ import { useNavigate } from 'react-router-dom';
 function Login({ setToken }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [name, setName] = useState('');
+  const [isRegister, setIsRegister] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  const handleLogin = async (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError('');
     
     try {
-      // Try demo mode first (bypass auth)
+      if (isRegister) {
+        // Registration
+        const res = await fetch('https://callpilot-backend-98t8.onrender.com/api/register', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({name, email, password})
+        });
+        if (!res.ok) throw new Error('Registration failed');
+        const data = await res.json();
+        localStorage.setItem('token', data.access_token);
+        localStorage.setItem('tenant', JSON.stringify(data.tenant));
+        setToken(data.access_token);
+        navigate('/dashboard');
+        return;
+      }
+      
+      // Demo mode
       if (email === 'demo@callpilot.com' && password === 'demo') {
         const demoTenant = {
           id: 'demo-123',
@@ -31,7 +49,7 @@ function Login({ setToken }) {
         return;
       }
       
-      // Try real API
+      // Real API login
       const formData = new URLSearchParams();
       formData.append('username', email);
       formData.append('password', password);
@@ -42,10 +60,7 @@ function Login({ setToken }) {
         body: formData
       });
       
-      if (!response.ok) {
-        // Fall back to demo mode
-        throw new Error('Use demo@callpilot.com / demo');
-      }
+      if (!response.ok) throw new Error('Invalid credentials');
       
       const data = await response.json();
       localStorage.setItem('token', data.access_token);
@@ -53,8 +68,7 @@ function Login({ setToken }) {
       setToken(data.access_token);
       navigate('/dashboard');
     } catch (err) {
-      // If API fails, suggest demo
-      setError('Invalid credentials. Try: demo@callpilot.com / demo');
+      setError(err.message);
     } finally {
       setLoading(false);
     }
@@ -70,11 +84,27 @@ function Login({ setToken }) {
                 <h2 className="text-center mb-4" style={{ color: '#e94560' }}>
                   🔌 CallPilot
                 </h2>
-                <p className="text-center mb-4 text-muted">Sign in to your agency portal</p>
+                <p className="text-center mb-4 text-muted">
+                  {isRegister ? 'Create your agency account' : 'Sign in to your agency portal'}
+                </p>
                 
-                {error && <Alert variant="warning">{error}</Alert>}
+                {error && <Alert variant="danger">{error}</Alert>}
                 
-                <Form onSubmit={handleLogin}>
+                <Form onSubmit={handleSubmit}>
+                  {isRegister && (
+                    <Form.Group className="mb-3">
+                      <Form.Label>Agency Name</Form.Label>
+                      <Form.Control
+                        type="text"
+                        value={name}
+                        onChange={(e) => setName(e.target.value)}
+                        placeholder="Your Agency Name"
+                        style={{ background: '#0f3460', border: '1px solid #e94560', color: 'white' }}
+                        required={isRegister}
+                      />
+                    </Form.Group>
+                  )}
+                  
                   <Form.Group className="mb-3">
                     <Form.Label>Email</Form.Label>
                     <Form.Control
@@ -93,7 +123,7 @@ function Login({ setToken }) {
                       type="password"
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
-                      placeholder="demo"
+                      placeholder="••••••••"
                       style={{ background: '#0f3460', border: '1px solid #e94560', color: 'white' }}
                       required
                     />
@@ -105,15 +135,27 @@ function Login({ setToken }) {
                     className="w-100"
                     disabled={loading}
                   >
-                    {loading ? 'Signing in...' : 'Sign In'}
+                    {loading ? (isRegister ? 'Creating Account...' : 'Signing in...') : (isRegister ? 'Create Account' : 'Sign In')}
                   </Button>
                 </Form>
                 
-                <div className="text-center mt-4 p-3" style={{ background: '#0f3460', borderRadius: '8px' }}>
-                  <small className="text-muted">Demo Mode</small>
-                  <div style={{ color: '#e94560', fontWeight: 'bold' }}>demo@callpilot.com</div>
-                  <small className="text-muted">password: demo</small>
-                </div>
+                <p className="text-center mt-4 text-muted">
+                  {isRegister ? 'Already have an account?' : "Don't have an account?"}{' '}
+                  <span 
+                    style={{ color: '#e94560', cursor: 'pointer' }} 
+                    onClick={() => setIsRegister(!isRegister)}
+                  >
+                    {isRegister ? ' Sign in' : ' Sign up'}
+                  </span>
+                </p>
+                
+                {!isRegister && (
+                  <div className="text-center mt-3 p-3" style={{ background: '#0f3460', borderRadius: '8px' }}>
+                    <small className="text-muted">Demo Mode</small>
+                    <div style={{ color: '#e94560', fontWeight: 'bold' }}>demo@callpilot.com</div>
+                    <small className="text-muted">password: demo</small>
+                  </div>
+                )}
               </Card.Body>
             </Card>
           </Col>
