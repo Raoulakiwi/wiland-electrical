@@ -37,7 +37,7 @@ function Dashboard() {
 
   const fetchClients = async (token) => {
     try {
-      const response = await fetch('/api/clients', {
+      const response = await fetch('https://callpilot-backend-98t8.onrender.com/api/clients', {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       
