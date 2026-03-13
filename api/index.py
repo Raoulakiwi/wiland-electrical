@@ -168,6 +168,10 @@ def delete_client(client_id):
 
 # Vercel entry point
 
+@app.route("/")
+def home():
+    return jsonify({"status": "ok"})
+
 @app.route("/api/admin/users", methods=["GET"])
 def list_users():
     conn = sqlite3.connect(DB_NAME)
